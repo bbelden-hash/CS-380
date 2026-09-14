@@ -1,6 +1,7 @@
 import numpy as np
 
 dataMatrix = np.zeros((50, 8), dtype = np.float64)
+myCos = np.zeros((8, 8), dtype = np.float64)
 
 # extract the word vector of the word 'w' from the file with name 'fn'
 def extractVector(fn, w):
@@ -90,10 +91,161 @@ def prettyPrint(data):
     
     for row in data:
         for value in row:
-            print(f"{value:10.4f}", end=" ")
+            print(f"{value:10.5f}", end=" ")
         print()
+        
+        
+# cosine similarity
+def myCosSim(v1, v2):
     
-           
+    # using a for loop
+    
+    howAlike = 0
+    
+    if len(v1) != len(v2):
+        return ("error: dimension of vectors (50) must be same to take inner product between the two")
+    
+    for i in range(len(v1)):
+        product = v1[i] * v2[i]
+        howAlike += product
+        
+    return howAlike
+       
+def pNorm(p, v):
+    
+    sum = 0
+    
+    for num in v:
+        pth = abs(num)**p
+        sum += pth
+        
+    norm = sum**(1/p)
+    return norm
+    
+def buildVectors(fn):
+    
+    # initialize an empty dictionary to store output
+    # index using word (key), output will be vector associated with word (value)
+    vectors = {}
+    
+    targets = {"good", "evil", "devil", "angel", "goods", "cup", "happy", "ethical"}
+    
+    with open(fn, "r") as file:
+        for line in file:
+            wordsinLine = line.split()
+            
+            if not wordsinLine:
+                continue
+            word = wordsinLine[0]
+            
+            if word in targets:
+                vectorData = extractVector("glove.2024.wikigiga.50d.txt", word)
+                
+                vectors[word] = vectorData[1:]
+    
+    return vectors
+
+def twoNorms(v):
+    
+    norms = {}
+    targets = {"good", "evil", "devil", "angel", "goods", "cup", "happy", "ethical"}
+    
+    for word, vector in v.items():
+        
+        if word in targets:
+            norm = pNorm(2, vector)
+            norms[word] = norm
+            
+    return norms
+
+def unitVectors(vectors, norms):
+    
+    for wordV, vector in vectors.items():
+        for wordN, norm in norms.items():
+            
+            if wordV == wordN:
+                
+                for i, value in enumerate(vector):
+                    vector[i] = value / norm
+                    
+def cosTheta(embedding):
+    
+    i = 0
+    
+    for w1, v1 in embedding.items():
+        j = 0
+        for w2, v2 in embedding.items():
+            
+            cos = myCosSim(v1, v2)
+            myCos[i][j] = cos
+            j += 1
+            
+        i += 1
+            
+        
+        
+                        
+                    
+    
+    
+            
+            
+        
+
+# =============================================================================================================
+         
 # buildMatrix("words.txt")
-data = loadData("dataMatrix01_0000.npy")
-prettyPrint(data)
+# bigData = loadData("dataMatrix01_0000.npy")
+# prettyPrint(data)
+
+myVectors = buildVectors("words.txt")
+myNorms = twoNorms(myVectors)
+unitVectors(myVectors, myNorms)
+cosTheta(myVectors)
+cosData = loadData("myCos.npy")
+prettyPrint(cosData)
+
+
+        
+            
+            
+            
+
+
+            
+            
+            
+
+
+
+
+
+                
+                    
+            
+                    
+                    
+                   
+                        
+                    
+                    
+                    
+                
+            
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+
+
+        
+        
+        
+        
+
