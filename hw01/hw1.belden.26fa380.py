@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 dataMatrix = np.zeros((50, 8), dtype = np.float64)
 myCos = np.zeros((8, 8), dtype = np.float64)
@@ -97,7 +98,6 @@ def prettyPrint(data):
         
 # cosine similarity
 def myCosSim(v1, v2):
-    
     # using a for loop
     
     howAlike = 0
@@ -110,8 +110,29 @@ def myCosSim(v1, v2):
         howAlike += product
         
     return howAlike
-       
+
+def npCosSim(v1, v2):
+    # using NumPy to do the heavy lifting
+    
+    v = np.array(v1)
+    w = np.array(v2)
+    
+    if len(v1) != len(v2):
+        return ("error: dimension of vectors (50) must be same to take the inner product between the two")
+    
+    dotProduct = np.dot(v, w)
+    normV1 = np.linalg.norm(v)
+    normV2 = np.linalg.norm(w)
+    
+    if normV1 == 0 or normV2 == 0:
+        return 0.00000
+    
+    result = dotProduct / (normV1 * normV2)
+    return result
+    
+# Euclidean length    
 def pNorm(p, v):
+    # using a for loop
     
     sum = 0
     
@@ -181,6 +202,31 @@ def cosTheta(embedding):
             j += 1
             
         i += 1
+        
+def nplen(v):
+    # using NumPy
+    
+    myLen = np.linalg.norm(v)
+    return myLen
+
+def forNorms(v):
+    
+    normData = np.zeros(8, dtype = np.float64)
+    
+    for i, vector in enumerate(v.values()):
+        curNorm = pNorm(2, vector)
+        normData[i] = curNorm
+        
+    for data in normData:
+        print(f"{data:10.5f}", end=" ")
+    
+    return normData
+        
+        
+        
+        
+        
+        
             
         
         
@@ -196,7 +242,7 @@ def cosTheta(embedding):
          
 # buildMatrix("words.txt")
 # bigData = loadData("dataMatrix01_0000.npy")
-# prettyPrint(data)
+# prettyPrint(bigData)
 
 myVectors = buildVectors("words.txt")
 myNorms = twoNorms(myVectors)
@@ -204,6 +250,11 @@ unitVectors(myVectors, myNorms)
 cosTheta(myVectors)
 cosData = loadData("myCos.npy")
 prettyPrint(cosData)
+
+# theNorms = forNorms(myVectors)
+
+
+
 
 
         
