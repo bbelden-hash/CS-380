@@ -221,6 +221,16 @@ def nplen(v):
     myLen = np.linalg.norm(v)
     return myLen
 
+def distance(p1, p2):
+    
+    vector = []
+    
+    for i in range(len(p1)):
+        coordinate = p2[i] - p1[i]
+        vector.append(coordinate)
+        
+    return vector
+
 # mikolov example 
 def mikolov(fn):
     
@@ -255,6 +265,10 @@ def computeMik(v):
     for i, (val1, val2) in enumerate(zip(vector1, vector2)):
         print(f"Row {i:<4} | {val1:12.5f} | {val2:12.5f}")
         
+    mikDist = distance(vector1, vector2)
+    eucNorm = pNorm(2, mikDist)
+    print(eucNorm)
+    
     similarity = npCosSim(vector1, vector2)
     return similarity
     
