@@ -1,8 +1,8 @@
 import numpy as np
-import math
 
 dataMatrix = np.zeros((50, 8), dtype = np.float64)
 myCos = np.zeros((8, 8), dtype = np.float64)
+myMikCos = np.zeros((4, 4), dtype = np.float64)
 
 # extract the word vector of the word 'w' from the file with name 'fn'
 def extractVector(fn, w):
@@ -149,7 +149,7 @@ def buildVectors(fn):
     # index using word (key), output will be vector associated with word (value)
     vectors = {}
     
-    targets = {"good", "evil", "devil", "angel", "goods", "cup", "happy", "ethical"}
+    targets = {"good", "evil", "devil", "angel", "goods", "cup", "happy", "ethical"} # update targets accordingly based on what word vectors you are looking for in GloVe
     
     with open(fn, "r") as file:
         for line in file:
@@ -169,13 +169,9 @@ def buildVectors(fn):
 def twoNorms(v):
     
     norms = {}
-    targets = {"good", "evil", "devil", "angel", "goods", "cup", "happy", "ethical"}
     
     for word, vector in v.items():
-        
-        if word in targets:
-            norm = pNorm(2, vector)
-            norms[word] = norm
+        norms[word] = pNorm(2, vector)
             
     return norms
 
@@ -197,11 +193,27 @@ def cosTheta(embedding):
         j = 0
         for w2, v2 in embedding.items():
             
-            cos = myCosSim(v1, v2)
-            myCos[i][j] = cos
+            cos = myCosSim(v1, v2) 
+            myCos[i][j] = cos # change cosine simlarity matrix dimensions (at top with 'global' macros) pending on number of words looking for in GloVe file 
             j += 1
             
         i += 1
+        
+def cosThetaMik(embedding):
+    
+    i = 0
+    
+    for w1, v1 in embedding.items():
+        j = 0
+        for w2, v2 in embedding.items():
+            
+            cos = myCosSim(v1, v2)
+            myMikCos[i][j] = cos
+            j += 1
+            
+        i += 1
+        
+    return myMikCos
         
 def nplen(v):
     # using NumPy
@@ -209,94 +221,60 @@ def nplen(v):
     myLen = np.linalg.norm(v)
     return myLen
 
-def forNorms(v):
+# mikolov example 
+def mikolov(fn):
     
-    normData = np.zeros(8, dtype = np.float64)
+    vectors = {}
+    targets = {"king", "queen", "man", "woman"}
     
-    for i, vector in enumerate(v.values()):
-        curNorm = pNorm(2, vector)
-        normData[i] = curNorm
-        
-    for data in normData:
-        print(f"{data:10.5f}", end=" ")
-    
-    return normData
-        
-        
-        
-        
-        
-        
+    with open(fn, "r") as file:
+        for line in file:
+            wordsinLine = line.split()
             
-        
-        
-                        
-                    
-    
-    
+            if not wordsinLine:
+                continue
+            word = wordsinLine[0]
             
-            
-        
+            if word in targets:
+                mikolovData = extractVector("glove.2024.wikigiga.50d.txt", word)
+                
+                vectors[word] = mikolovData[1:]
+                
+    return vectors
 
-# =============================================================================================================
+def computeMik(v):
+    
+    vector1 = v["king"] - v["man"] + v["woman"]
+    vector2 = v["queen"]
+     
+    # Print a header column
+    print(f"{'Index':<8} | {'Math Vector':<12} | {'Queen Vector':<12}")
+    print("-" * 40)
+    
+    # Loop through and pair them up row by row
+    for i, (val1, val2) in enumerate(zip(vector1, vector2)):
+        print(f"Row {i:<4} | {val1:12.5f} | {val2:12.5f}")
+        
+    similarity = npCosSim(vector1, vector2)
+    return similarity
+    
+
+# ==========================================================================================================================
+# Place to call all above functions, read and call accordingly ...
          
 # buildMatrix("words.txt")
 # bigData = loadData("dataMatrix01_0000.npy")
 # prettyPrint(bigData)
 
-myVectors = buildVectors("words.txt")
-myNorms = twoNorms(myVectors)
-unitVectors(myVectors, myNorms)
-cosTheta(myVectors)
-cosData = loadData("myCos.npy")
-prettyPrint(cosData)
+# myVectors = buildVectors("words.txt")
+# myNorms = twoNorms(myVectors)
+# unitVectors(myVectors, myNorms)
+# cosTheta(myVectors)
+# cosData = loadData("myCos.npy")
+# prettyPrint(cosData)
 
-# theNorms = forNorms(myVectors)
-
-
-
-
-
-        
-            
-            
-            
-
-
-            
-            
-            
-
-
-
-
-
-                
-                    
-            
-                    
-                    
-                   
-                        
-                    
-                    
-                    
-                
-            
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-        
-        
-        
-        
-
+myMikolov = mikolov("mikolovWords.txt")
+# mikNorms = twoNorms(myMikolov)
+# unitVectors(myMikolov, mikNorms)
+# cosMikData = cosThetaMik(myMikolov)
+similarity = computeMik(myMikolov)
